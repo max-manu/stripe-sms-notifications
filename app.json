@@ -20,5 +20,9 @@
         "description": "Your personal phone number to receive SMS messages. (Format: +15555555555)",
         "required": true
       }
+    "TO_NUMBER":{
+    "description":"to which number you want to send",
+    "require":true
+  }
     }
 }
