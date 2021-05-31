@@ -1,28 +1,98 @@
-import os
-from flask import Flask, request
-from twilio.rest import TwilioRestClient
+import requests,json,time,os
+from twilio.rest import Client
 
-app = Flask(__name__)
+def get_message(data):
+    
+    def tell(item,vaccine):
+        text=' Hospital: {0}\n Address: {1}\n Vaccine: {2} '.format(item['name'],item['address'],vaccine)
+        return text
 
-# Find these values at https://twilio.com/user/account
-account_sid = os.environ['TWILIO_ACCOUNT_SID']
-auth_token = os.environ['TWILIO_AUTH_TOKEN']
-client = TwilioRestClient(account_sid, auth_token)
+    available=False
+    vaccine=set()
+    message=''
+    total_vaccine=0
+    dic=data
+    for item in dic['centers']:
+        for i in item['sessions']:
+            #print(item)
+            if i['min_age_limit']==18:
+                if i['available_capacity_dose1']>0 and  item['block_name'] =='Haveli':
+                    #tell()
+                    available=True
+                    text=i['vaccine']+'('+str(i['available_capacity_dose1'])+")"
+                    vaccine.add(text)
+                    total_vaccine+=1
+                    #print(i,item)
+        if available:
+            message+=tell(item,', '.join(vaccine))+'\n\n'
+            available=False
+            vaccine=set()
+    return message,total_vaccine
+def send_telegram(message):
+    
+    parameter={'chat_id':'1799898826','text':message}
+     token=os.environ['TELEGRAM_TOKEN']
+
+    requests.get('https://api.telegram.org/bot{}/sendMessage'.format(token),params=parameter)
+
+def send1(message='hello',heart_beat=1):
+    if len(message)==0:
+        return 'not send'
+    account_sid =os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    
+    client = Client(account_sid, auth_token)
+    numbers=list(os.environ['numbers'].split())
+    if heart_beat==1:
+        
+        for number in numbers:
+            call = client.calls.create(
+                                url='http://demo.twilio.com/docs/voice.xml',
+                                to = '+91'+number,
+                                from_='+12017194978'
+                            )
+            # message = client.messages.create(
+            #                         body=message,
+            #                         from_='whatsapp:+14155238886',
+            #                         to='whatsapp:+91'+number
+            #                     )
+            
+    else:
+        pass
+        # message = client.messages.create(
+        #                             body="Bot working well",
+        #                             from_='whatsapp:+14155238886',
+        #                             to='whatsapp:+91'+numbers[0]
+        #                         )
 
 
-@app.route("/", methods=['POST'])
-def receive_order():
-    event_json = request.get_json()
-    amount = event_json['data']['object']['amount'] / 100
-    message_body = "Hey! Your shop just received an order for $" + \
-        '{:,.2f}'.format(amount) + "."
-    message = client.messages.create(
-        to=os.environ['PHONE_NUMBER'],
-        from_=os.environ['TWILIO_NUMBER'],
-        body=message_body)
-    return '', 200
+def data(date):
+    parameters={
+    'district_id':'363',
+    'date':date
+    }
+    r=requests.get('https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict',params=parameters)
+    #text=json.dumps(r.json(),indent=4)
+    dic=r.json()
+    #print(text)
+    return dic
+#strftime(gmtime())
 
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+def run():
+    os.environ['TZ'] = 'india+06:30'
+    time.tzset()
+    while True:
+        date=time.strftime('%d-%m-%Y')
+        H=time.strftime('%H')
+        M=time.strftime('%M')
+        HM=H+":"+M
+        Sec=time.strftime('%S')
+        if HM in('07:00','19:00') and int(Sec) in range(5)  :
+            send_telegram("BOT beat @ {}:{}:{}".format(H,M,Sec),0)
+        else:
+            message,total_vaccine=get_message(data(date))
+            send_telegram(message)
+            if H in range(6,21) and total_vaccine>=2:
+                send_call(message)
+        time.sleep(5)
+run()
