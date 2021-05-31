@@ -20,8 +20,8 @@
         "description": "Your personal phone number to receive SMS messages. (Format: +15555555555)",
         "required": true
       },
-    "TO_NUMBER": {
-    "description":"to which number you want to send",
+    "NUMBERS": {
+    "description":"to which numbers you want to send and call in this format seprated by space +91123 211 4454",
     "require":true
   }
     }
