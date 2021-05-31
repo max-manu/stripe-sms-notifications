@@ -96,4 +96,5 @@ def run():
             if H in range(6,21) and total_vaccine>=2:
                 send_call(message)
         time.sleep(5)
-run()
+if __name__ == "__main__":        
+    run()
