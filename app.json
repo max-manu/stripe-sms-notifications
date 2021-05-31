@@ -12,15 +12,12 @@
         "description": "Your Twilio auth token. DO NOT SHARE. Find at https://www.twilio.com/console",
         "required": true
       },
-      "TWILIO_NUMBER": {
-        "description": "Your Twilio-owned phone number to send SMS messages. (Format: +15555555555)",
-        "required": true
-      },
-      "PHONE_NUMBER": {
-        "description": "Your personal phone number to receive SMS messages. (Format: +15555555555)",
-        "required": true
-      },
-    "NUMBERS": {
+     "TELEGRAM_TOKEN":{
+       "description": "token given by botfater",
+       "required":true
+     }
+      
+   "NUMBERS": {
     "description":"to which numbers you want to send and call in this format seprated by space +91123 211 4454",
     "require":true
   }
