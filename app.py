@@ -79,7 +79,7 @@ def data(date):
 #strftime(gmtime())
 
 def run():
-    os.environ['TZ'] = 'india+06:30'
+    os.environ['TZ'] = 'india-05:30'
     time.tzset()
     send_telegram('app started')
     while True:
