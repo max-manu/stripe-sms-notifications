@@ -81,6 +81,7 @@ def data(date):
 def run():
     os.environ['TZ'] = 'india+06:30'
     time.tzset()
+    send_telegram('app started')
     while True:
         date=time.strftime('%d-%m-%Y')
         H=time.strftime('%H')
